@@ -1165,6 +1165,9 @@ void UsbPacketReceived(UsbCommand *c) {
 		case CMD_EPA_PACE_REPLAY:
 			EPA_PACE_Replay(c);
 			break;
+        case CMD_EPA_PACE_SIMULATE:
+		    EPA_PACE_Simulate(c);
+			break;
 
 		case CMD_READER_MIFARE:
 			ReaderMifare(c->arg[0]);

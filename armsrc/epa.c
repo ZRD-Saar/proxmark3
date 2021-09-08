@@ -553,3 +553,45 @@ int EPA_Setup()
 	Dbprintf("No card found.");
 	return 1;
 }
+
+void EPA_PACE_Simulate(UsbCommand *c)
+{
+	//---------Initializing---------
+
+	// Get password from arguments
+	unsigned char pwd[6];
+	memcpy(pwd, c->d.asBytes, 6);
+
+	// Return value of the called function
+	int func_return = 0;
+
+	// Set up communication with the card
+	func_return = EPA_Setup();
+	if (func_return != 0){
+		EPA_PACE_Collect_Nonce_Abort(1, func_return);
+		return;
+	}
+
+	// Read EF.CardAccess
+	uint8_t card_access[210] = {0};
+	int card_access_length = EPA_Read_CardAccess(card_access, 210);
+
+	// The response has to be at least this big to hold the OID
+	if (card_access_length < 18) {
+		EPA_PACE_Collect_Nonce_Abort(2, card_access_length);
+		return;
+	}
+
+	// PACEInfo of the card
+	pace_version_info_t pace_version_info;
+
+	// Search for the PACE OID
+	func_return = EPA_Parse_CardAccess(card_access,
+	                                   card_access_length,
+	                                   &pace_version_info);
+	if (func_return != 0 || pace_version_info.version == 0) {
+		EPA_PACE_Collect_Nonce_Abort(3, func_return);
+		return;
+	}
+	Dbprintf("Standardized Domain Parameter: %i", pace_version_info.parameter_id);
+}

@@ -15,4 +15,6 @@ int CmdHFEPA(const char *Cmd);
 
 int CmdHFEPACollectPACENonces(const char *Cmd);
 
+int CmdHFEPASimulatePACE(const char *Cmd);
+
 #endif // CMDHFEPA_H__

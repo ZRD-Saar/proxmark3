@@ -168,6 +168,7 @@ typedef struct {
 #define CMD_WRITER_LEGIC_RF                                               0x0389
 #define CMD_EPA_PACE_COLLECT_NONCE                                        0x038A
 #define CMD_EPA_PACE_REPLAY                                               0x038B
+#define CMD_EPA_PACE_SIMULATE                                             0x038C
 
 #define CMD_ICLASS_CLONE                                                  0x0390
 #define CMD_ICLASS_DUMP                                                   0x0391

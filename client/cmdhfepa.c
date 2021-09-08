@@ -179,6 +179,46 @@ int CmdHFEPAPACEReplay(const char *Cmd)
 	return 1;
 }
 
+int CmdHFEPAPACESimulate(const char *Cmd)
+{
+	unsigned int usePc = 0;
+	unsigned int pwdType = 0;
+	char pwd[6] = {0};
+
+	int scan_return = sscanf(Cmd, "%u %u %6c", &usePc, &pwdType, pwd);
+	if (scan_return < 1) {
+		PrintAndLog("Not enough arguments.");
+		return 0;
+	}
+
+	PrintAndLog("Starting PACE simulation...");
+	UsbCommand usb_cmd = {CMD_EPA_PACE_SIMULATE,{0, 0, 0}};
+	memcpy(usb_cmd.d.asBytes, pwd, 6);
+	SendCommand(&usb_cmd);
+	UsbCommand resp;
+	WaitForResponse(CMD_ACK,&resp);
+	if (resp.arg[0] != 0) {
+		PrintAndLog("\nPACE failed in step %u!", (uint32_t)resp.arg[0]);
+		PrintAndLog("MSE Set AT: %u us", resp.d.asDwords[0]);
+		PrintAndLog("GA Get Nonce: %u us", resp.d.asDwords[1]);
+		PrintAndLog("GA Map Nonce: %u us", resp.d.asDwords[2]);
+		PrintAndLog("GA Perform Key Agreement: %u us", resp.d.asDwords[3]);
+		PrintAndLog("GA Mutual Authenticate: %u us", resp.d.asDwords[4]);
+		PrintAndLog("----------------");
+	}
+	else {
+		PrintAndLog("PACE successful!");
+		PrintAndLog("MSE Set AT: %u us", resp.d.asDwords[0]);
+		PrintAndLog("GA Get Nonce: %u us", resp.d.asDwords[1]);
+		PrintAndLog("GA Map Nonce: %u us", resp.d.asDwords[2]);
+		PrintAndLog("GA Perform Key Agreement: %u us", resp.d.asDwords[3]);
+		PrintAndLog("GA Mutual Authenticate: %u us", resp.d.asDwords[4]);
+		PrintAndLog("----------------");
+	}
+
+	return 1;
+}
+
 ////////////////////////////////The new commands lie above here/////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -191,6 +231,8 @@ static const command_t CommandTable[] =
               "<m> <n> <d> Acquire n>0 encrypted PACE nonces of size m>0 with d sec pauses"},
   {"preplay", CmdHFEPAPACEReplay,        0,
    "<mse> <get> <map> <pka> <ma> Perform PACE protocol by replaying given APDUs"},
+   {"simulate", CmdHFEPAPACESimulate,	 0,
+   "<pc> <pty> <pwd> Simulate PACE protocol with given password pwd of type pty. The crypto is performed on pc or proxmark"},
   {NULL, NULL, 0, NULL}
 };
 
